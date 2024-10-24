@@ -9,7 +9,7 @@ class User:
     email: str
     password: str
     login: bool
-    role: bool  # False admin True user
+    role: str
 
 
 @dataclass
@@ -32,10 +32,10 @@ class UserManagement(object):
             self.users = joblib.load(self._db_filename)
         else:
             self.users = [
-                User("shahikian", "shahikian@gmail.com", "12345", False, True)
+                User("admin-defult", "admin-defult@gmail.com", "admin", False, 'admin')
             ]
-        self._db_filename1 = os.path.join(os.path.dirname(__file__), 'db', 'questions.joblib')
 
+        self._db_filename1 = os.path.join(os.path.dirname(__file__), 'db', 'questions.joblib')
         if os.path.exists(self._db_filename1):
             self.questions = joblib.load(self._db_filename1)
         else:
@@ -43,8 +43,20 @@ class UserManagement(object):
                 Question("riazi", "2+2=?", "1-50", "2-40", "3-4", "4-40", "3")
             ]
 
-    def add_user(self, user: User):
-        self.users.append(user)
+    def add_user(self, new_user: User):
+        user_exist = False
+        email_exist = False
+        for user in self.users:
+            if new_user.username == user.username:
+                user_exist = True
+            if new_user.email == user.email:
+                email_exist = True
+
+        if user_exist or email_exist:
+            return False
+        else:
+            self.users.append(new_user)
+            return True
 
     def save(self):
         joblib.dump(self.users, self._db_filename)
@@ -69,11 +81,15 @@ class UserManagement(object):
         return False
 
     def get_user(self, username, password):
-
         for user in self.users:
             if user.username == username and user.password == password:
                 return user
+        return
 
+    def get_user_by_username(self, username):
+        for user in self.users:
+            if user.username == username:
+                return user
         return
 
     def change_current_user_state(self, state=False):
@@ -86,6 +102,13 @@ class UserManagement(object):
         for q in self.questions:
             if q.soal == question.soal:
                 self.questions.remove(question)
+
+    def get_logged_in_user(self):
+        # Logic to check session or user list for the logged-in user
+        for user in self.users:
+            if user.login:  # Assuming login_state tracks if a user is logged in
+                return user
+        return None
 
 
 user_manager = UserManagement()
