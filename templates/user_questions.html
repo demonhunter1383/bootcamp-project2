@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Questions</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Question</th>
+        <th>Option 1</th>
+        <th>Option 2</th>
+        <th>Option 3</th>
+        <th>Option 4</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for question in questions %}
+        <tr>
+          <td>{{ question.category }}</td>
+          <td>{{ question.soal }}</td>
+          <td>{{ question.gozine1 }}</td>
+          <td>{{ question.gozine2 }}</td>
+          <td>{{ question.gozine3 }}</td>
+          <td>{{ question.gozine4 }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

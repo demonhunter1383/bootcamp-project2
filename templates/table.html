@@ -1,0 +1,27 @@
+{% extends 'base-fullscreen.html' %}
+
+{% block title %}
+    Table of Members
+{% endblock %}
+
+{% include 'navigation-fullscreen.html' %}
+
+{% block content %}
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Number</th>
+        <th>Age</th>
+    </tr>
+    
+    {% for name, value in data.items() %}
+        <tr>
+            <td>{{ name }}</td>
+            <td>{{ value.number }}</td>
+            <td>{{ value.age }}</td>
+        </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock content %}

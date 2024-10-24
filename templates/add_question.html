@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add a New Question</h2>
+    <form action="{{ url_for('add_question') }}" method="POST">
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <input type="text" class="form-control" id="category" name="category" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="soal">Question:</label>
+            <input type="text" class="form-control" id="soal" name="soal" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="gozine1">Option 1:</label>
+            <input type="text" class="form-control" id="gozine1" name="gozine1" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="gozine2">Option 2:</label>
+            <input type="text" class="form-control" id="gozine2" name="gozine2" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="gozine3">Option 3:</label>
+            <input type="text" class="form-control" id="gozine3" name="gozine3" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="gozine4">Option 4:</label>
+            <input type="text" class="form-control" id="gozine4" name="gozine4" required>
+        </div>
+
+        <div class="form-group mt-3">
+            <label for="answer">Correct Answer:</label>
+            <select class="form-control" id="answer" name="answer" required>
+                <option value="1">Option 1</option>
+                <option value="2">Option 2</option>
+                <option value="3">Option 3</option>
+                <option value="4">Option 4</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-4">Add Question</button>
+    </form>
+</div>
+{% endblock %}
