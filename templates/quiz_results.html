@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Quiz Results</h2>
+    <p>Your score: {{ score }}%</p>
+    <p>You got {{ feedback | length }} out of {{ total }} questions correct.</p>
+
+    <ul class="list-group mt-4">
+        {% for item in feedback %}
+        <li class="list-group-item">
+            <strong>Question:</strong> {{ item.question }}<br>
+            <strong>Status:</strong> {{ item.status }}
+            {% if item.status == 'Incorrect' %}
+                <br><strong>Correct Answer:</strong> {{ item.correct_answer }}
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('quiz_categories') }}" class="btn btn-primary mt-4">Take another quiz</a>
+</div>
+{% endblock %}

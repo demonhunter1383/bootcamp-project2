@@ -1,4 +1,6 @@
 import os
+import random
+
 import joblib
 from dataclasses import dataclass
 
@@ -109,6 +111,20 @@ class UserManagement(object):
             if user.login:  # Assuming login_state tracks if a user is logged in
                 return user
         return None
+
+    def get_categories(self):
+        categories = []
+        for question in self.questions:
+            categories.append(question.category)
+        categories = set(categories)
+        categories = list(categories)
+        return categories
+
+    def get_questions_by_category(self, category, num_questions):
+        # Filter questions by category
+        category_questions = [q for q in self.questions if q.category == category]
+        # Randomly select 'num_questions' questions from the category
+        return random.sample(category_questions, min(num_questions, len(category_questions)))
 
 
 user_manager = UserManagement()

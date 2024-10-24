@@ -1,6 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, request
-from flask_login import login_required
-# from Questions import question_manager, Question
+from flask import Flask, render_template, redirect, url_for, request, session
 from forms import Login, SignUp
 from user_management import user_manager, User, Question
 
@@ -138,6 +136,89 @@ def delete_question(soal):
             break
 
     return redirect(url_for('view_questions'))
+
+
+@app.route('/quiz_categories', methods=['GET'])
+def quiz_categories():
+    # Check if user is logged in
+    user = user_manager.get_logged_in_user()
+    if not user or not user.login:
+        return redirect(url_for('login'))
+
+    # Get the list of categories (from the database or joblib)
+    categories = user_manager.get_categories()
+    return render_template('quiz_categories.html', categories=categories)
+
+
+@app.route('/select_question_count/<category>', methods=['GET', 'POST'])
+def select_question_count(category):
+    user = user_manager.get_logged_in_user()
+    if not user or not user.login:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        num_questions = int(request.form['num_questions'])
+        return redirect(url_for('start_quiz', category=category, num_questions=num_questions))
+
+    return render_template('select_question_count.html', category=category)
+
+
+@app.route('/start_quiz/<category>/<int:num_questions>', methods=['GET', 'POST'])
+def start_quiz(category, num_questions):
+    user = user_manager.get_logged_in_user()
+    if not user or not user.login:
+        return redirect(url_for('login'))
+
+    # Get random questions from the selected category
+    questions = user_manager.get_questions_by_category(category, num_questions)
+
+    if request.method == 'POST':
+        # Collect user answers and store them in the session
+        answers = {f'question_{i + 1}': request.form.get(f'question_{i + 1}') for i in range(len(questions))}
+
+        # Store user answers and questions in the session
+        session['user_answers'] = answers
+        session['questions'] = questions  # Store questions to validate later
+
+        # Redirect to the results page
+        return redirect(url_for('quiz_results'))
+
+    return render_template('quiz.html', questions=questions, category=category)
+
+
+@app.route('/quiz_results', methods=['GET'])
+def quiz_results():
+    user = user_manager.get_logged_in_user()
+    if not user or not user.login:
+        return redirect(url_for('login'))
+
+    # Retrieve user's answers and questions from the session
+    user_answers = session.get('user_answers')
+    questions = session.get('questions')
+
+    if not user_answers or not questions:
+        return redirect(url_for('quiz_categories'))  # Redirect if there's no data to process
+
+    # Calculate score
+    correct_count = 0
+    total_questions = len(questions)
+    feedback = []
+
+    for i, question in enumerate(questions):
+        correct_answer = question['answer']  # The correct answer for this question
+        user_answer = user_answers.get(f'question_{i + 1}')  # The user's answer
+
+        if user_answer == correct_answer:
+            correct_count += 1
+            feedback.append({'question': question['soal'], 'status': 'Correct'})
+        else:
+            feedback.append({'question': question['soal'], 'status': 'Incorrect', 'correct_answer': correct_answer})
+
+    # Calculate the percentage score
+    score = (correct_count / total_questions) * 100
+
+    # Render the results page
+    return render_template('quiz_results.html', score=score, feedback=feedback, total=total_questions)
 
 
 if __name__ == '__main__':

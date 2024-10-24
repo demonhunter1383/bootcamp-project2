@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Select a Quiz Category</h2>
+    <ul class="list-group mt-4">
+        {% for category in categories %}
+            <li class="list-group-item">
+                <a href="{{ url_for('select_question_count', category=category) }}">{{ category }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

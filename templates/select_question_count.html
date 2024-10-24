@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Select Number of Questions for {{ category }}</h2>
+    <form action="{{ url_for('select_question_count', category=category) }}" method="POST">
+        <div class="form-group">
+            <label for="num_questions">Number of Questions:</label>
+            <input type="number" class="form-control" id="num_questions" name="num_questions" min="1" max="20" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4">Start Quiz</button>
+    </form>
+</div>
+{% endblock %}
