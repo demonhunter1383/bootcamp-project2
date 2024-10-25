@@ -125,13 +125,6 @@ class UserManagement(object):
             if q.soal == question.soal:
                 self.questions.remove(question)
 
-    def get_logged_in_user(self):
-        # Logic to check session or user list for the logged-in user
-        for user in self.users:
-            if user.login:  # Assuming login_state tracks if a user is logged in
-                return user
-        return None
-
     def get_categories(self):
         categories = []
         for question in self.questions:

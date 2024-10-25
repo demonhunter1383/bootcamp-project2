@@ -6,7 +6,6 @@
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-
     <div class="container-fluid py-4">
 
       <div class="row">
@@ -813,5 +812,35 @@
     },
   });
 </script>
+<!-- New Chart for Quiz History -->
+<canvas id="quizChart" width="400" height="200"></canvas>
+<script>
+    var ctx2 = document.getElementById('quizChart').getContext('2d');
+    var quizChart = new Chart(ctx2, {
+        type: 'line',  // You can change this to 'bar' if you prefer a bar chart
+        data: {
+            labels: {{ chart_data2.labels | tojson }},  // Timestamps for quiz history
+            datasets: [
+                {
+                    label: 'Quiz Scores',
+                    data: {{ chart_data2.scores | tojson }},  // Scores for quiz history
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 2,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100  // Assuming quiz scores are out of 100
+                }
+            }
+        }
+    });
+</script>
+
+
 
 {% endblock javascripts %}

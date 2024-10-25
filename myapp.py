@@ -16,9 +16,21 @@ def index():
         'mobile_apps_data': [50, 40, 300, 220, 500, 250, 400, 230, 500],
         'websites_data': [30, 90, 40, 140, 290, 290, 340, 230, 400]
     }
-
+    if user_manager.current_user is not None and user_manager.current_user.login and user_manager.current_user.quiz_history is not None:
+        quiz_history = user_manager.current_user.quiz_history
+        chart_data2 = {
+            'labels': [result['timestamp'].strftime('%b %d') for result in quiz_history],  # Format date
+            'scores': [result['score'] for result in quiz_history]  # Extract quiz scores
+        }
+    else:
+        # In case the user has no quiz history yet
+        chart_data2 = {
+            'labels': [],
+            'scores': []
+        }
     if user_manager.current_user is not None and user_manager.current_user.login:
-        return render_template('home.html', chart_data=chart_data)
+        print(user_manager.current_user)
+        return render_template('home.html', chart_data=chart_data, chart_data2=chart_data2)
     else:
         return redirect(url_for('login'))
 
@@ -61,7 +73,6 @@ def login():
 
             user_manager.change_login_state(username, password, True)
             user_manager.set_current_user(username, password)
-
             return redirect(url_for('index'))
 
         else:
@@ -133,7 +144,7 @@ def delete_question(soal):
 @app.route('/quiz_categories', methods=['GET'])
 def quiz_categories():
     # Check if user is logged in
-    user = user_manager.get_logged_in_user()
+    user = user_manager.current_user
     if not user or not user.login:
         return redirect(url_for('login'))
 
@@ -144,7 +155,7 @@ def quiz_categories():
 
 @app.route('/select_question_count/<category>', methods=['GET', 'POST'])
 def select_question_count(category):
-    user = user_manager.get_logged_in_user()
+    user = user_manager.current_user
     if not user or not user.login:
         return redirect(url_for('login'))
 
@@ -157,7 +168,7 @@ def select_question_count(category):
 
 @app.route('/start_quiz/<category>/<int:num_questions>', methods=['GET', 'POST'])
 def start_quiz(category, num_questions):
-    user = user_manager.get_logged_in_user()
+    user = user_manager.current_user
     if not user or not user.login:
         return redirect(url_for('login'))
 
@@ -180,7 +191,7 @@ def start_quiz(category, num_questions):
 
 @app.route('/quiz_results', methods=['GET'])
 def quiz_results():
-    user = user_manager.get_logged_in_user()
+    user = user_manager.current_user
     if not user or not user.login:
         return redirect(url_for('login'))
 
@@ -214,7 +225,8 @@ def quiz_results():
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
-    user = user_manager.get_logged_in_user()
+    user = user_manager.current_user
+    print(user)
     if not user or not user.login:
         return redirect(url_for('login'))
 
@@ -223,7 +235,7 @@ def profile():
         user.email = request.form['email']
         user_manager.save()  # Save changes to the database
         return redirect(url_for('profile'))
-
+    print(user)
     return render_template('profile.html', user=user)
 
 
