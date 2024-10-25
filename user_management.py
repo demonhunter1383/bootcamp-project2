@@ -1,8 +1,9 @@
+import datetime
 import os
 import random
-
+from datetime import datetime
 import joblib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -12,6 +13,18 @@ class User:
     password: str
     login: bool
     role: str
+    quiz_history: list = field(default_factory=list)  # Correct way to initialize a list
+
+    def add_quiz_result(self, category, score):
+        if not hasattr(self, 'quiz_history'):  # Check if quiz_history exists
+            self.quiz_history = []  # Initialize if missing
+
+        quiz_result = {
+            'category': category,
+            'score': score,
+            'timestamp': datetime.now()
+        }
+        self.quiz_history.append(quiz_result)
 
 
 @dataclass
@@ -25,6 +38,13 @@ class Question:
     answer: str
 
 
+def ensure_quiz_history_for_all_users(user_manager1):
+    for user in user_manager1.users:
+        if not hasattr(user, 'quiz_history'):
+            user.quiz_history = []  # Initialize the field if it doesn’t exist
+    user_manager1.save()  # Save updated users back to the database
+
+
 class UserManagement(object):
     def __init__(self) -> None:
 
@@ -34,7 +54,7 @@ class UserManagement(object):
             self.users = joblib.load(self._db_filename)
         else:
             self.users = [
-                User("admin-defult", "admin-defult@gmail.com", "admin", False, 'admin')
+                User("admin-defult", "admin-defult@gmail.com", "admin", False, 'admin', [])
             ]
 
         self._db_filename1 = os.path.join(os.path.dirname(__file__), 'db', 'questions.joblib')
@@ -128,3 +148,4 @@ class UserManagement(object):
 
 
 user_manager = UserManagement()
+ensure_quiz_history_for_all_users(user_manager)

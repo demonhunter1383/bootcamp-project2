@@ -6,14 +6,6 @@ app = Flask(__name__)
 app.secret_key = '935232e83c80bd5c3d3b7a8b397d85c14af5f6c9369d6d3f9c0ca4263e61332a'
 
 
-@app.route('/home/profile')
-def profile():
-    if user_manager.current_user is not None and user_manager.current_user.login:
-        return render_template('profile.html', current_user=user_manager.current_user)
-    else:
-        return redirect(url_for('login'))
-
-
 @app.route('/')
 @app.route('/home')
 def index():
@@ -42,9 +34,9 @@ def signup():
         print(password)
 
         if password == 'admin':
-            user = User(email=email, username=username, password=password, login=False, role='admin')
+            user = User(email=email, username=username, password=password, login=False, role='admin', quiz_history=[])
         else:
-            user = User(email=email, username=username, password=password, login=False, role='user')
+            user = User(email=email, username=username, password=password, login=False, role='user', quiz_history=[])
 
         can_save_user = user_manager.add_user(user)
         if can_save_user:
@@ -192,33 +184,47 @@ def quiz_results():
     if not user or not user.login:
         return redirect(url_for('login'))
 
-    # Retrieve user's answers and questions from the session
     user_answers = session.get('user_answers')
     questions = session.get('questions')
 
     if not user_answers or not questions:
-        return redirect(url_for('quiz_categories'))  # Redirect if there's no data to process
+        return redirect(url_for('quiz_categories'))
 
-    # Calculate score
     correct_count = 0
-    total_questions = len(questions)
     feedback = []
+    total_questions = len(questions)
 
     for i, question in enumerate(questions):
-        correct_answer = question['answer']  # The correct answer for this question
-        user_answer = user_answers.get(f'question_{i + 1}')  # The user's answer
-
+        correct_answer = question['answer']
+        user_answer = user_answers.get(f'question_{i + 1}')
         if user_answer == correct_answer:
             correct_count += 1
             feedback.append({'question': question['soal'], 'status': 'Correct'})
         else:
             feedback.append({'question': question['soal'], 'status': 'Incorrect', 'correct_answer': correct_answer})
 
-    # Calculate the percentage score
     score = (correct_count / total_questions) * 100
 
-    # Render the results page
+    # Save quiz result to user's profile
+    user.add_quiz_result(category=questions[0]['category'], score=score)
+    user_manager.save()  # Ensure this saves user data including quiz history
+
     return render_template('quiz_results.html', score=score, feedback=feedback, total=total_questions)
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    user = user_manager.get_logged_in_user()
+    if not user or not user.login:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        # Update user profile
+        user.email = request.form['email']
+        user_manager.save()  # Save changes to the database
+        return redirect(url_for('profile'))
+
+    return render_template('profile.html', user=user)
 
 
 if __name__ == '__main__':
